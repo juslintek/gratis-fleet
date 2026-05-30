@@ -35,7 +35,7 @@ add_action('rest_api_init', [\Gratis\Fleet\API\WorkerEndpoint::class, 'register'
 
 // Admin dashboard (controller mode)
 add_action('admin_menu', function () {
-    if (!get_option('gratis_fleet_sites')) return;
+    
     add_menu_page(
         'Fleet Manager',
         'Fleet',
