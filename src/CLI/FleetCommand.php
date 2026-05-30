@@ -5,6 +5,7 @@ use Gratis\Fleet\SiteManager;
 use Gratis\Fleet\UptimeMonitor;
 use Gratis\Fleet\SecurityScanner;
 use Gratis\Fleet\SEOAuditor;
+use Gratis\Fleet\BrokenLinkChecker;
 
 /** WP-CLI commands: wp gratis-fleet <subcommand> */
 final class FleetCommand
@@ -242,6 +243,44 @@ final class FleetCommand
             $icon = ($page['score'] ?? 0) >= 80 ? '✓' : (($page['score'] ?? 0) >= 50 ? '⚠' : '✗');
             $url = str_replace(home_url(), '', $page['url'] ?? '');
             \WP_CLI::log("  {$icon} {$page['score']}/100 — {$url}");
+        }
+    }
+    /**
+     * Check for broken links in published content.
+     *
+     * ## OPTIONS
+     * [--limit=<n>]
+     * : Max posts to scan.
+     * ---
+     * default: 50
+     * ---
+     *
+     * ## EXAMPLES
+     *     wp gratis-fleet broken-links
+     *
+     * @subcommand broken-links
+     * @when after_wp_load
+     */
+    public function broken_links($args, $assoc_args): void
+    {
+        $limit = (int) ($assoc_args['limit'] ?? 50);
+        \WP_CLI::log("Scanning for broken links (up to {$limit} posts)...");
+        $result = BrokenLinkChecker::scan($limit);
+        \WP_CLI::log("Links checked: {$result['checked']}");
+        if (!empty($result['broken'])) {
+            \WP_CLI::log("\nBroken links:");
+            foreach ($result['broken'] as $link) {
+                \WP_CLI::log("  ✗ [{$link['status']}] {$link['url']} (in: {$link['post']})");
+            }
+        }
+        if (!empty($result['redirects'])) {
+            \WP_CLI::log("\nRedirects:");
+            foreach ($result['redirects'] as $link) {
+                \WP_CLI::log("  ⚠ [{$link['status']}] {$link['url']} (in: {$link['post']})");
+            }
+        }
+        if (empty($result['broken']) && empty($result['redirects'])) {
+            \WP_CLI::success("No broken links found!");
         }
     }
 }
