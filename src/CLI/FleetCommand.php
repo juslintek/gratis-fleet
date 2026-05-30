@@ -2,6 +2,9 @@
 namespace Gratis\Fleet\CLI;
 
 use Gratis\Fleet\SiteManager;
+use Gratis\Fleet\UptimeMonitor;
+use Gratis\Fleet\SecurityScanner;
+use Gratis\Fleet\SEOAuditor;
 
 /** WP-CLI commands: wp gratis-fleet <subcommand> */
 final class FleetCommand
@@ -142,5 +145,103 @@ final class FleetCommand
         \WP_CLI::log("Fleet API Key: {$key}");
         \WP_CLI::log("Add this site to a controller with:");
         \WP_CLI::log("  wp gratis-fleet add " . get_site_url() . " {$key}");
+    }
+
+    /**
+     * Check uptime of all fleet sites.
+     *
+     * ## EXAMPLES
+     *     wp gratis-fleet uptime
+     *
+     * @when after_wp_load
+     */
+    public function uptime($args, $assoc_args): void
+    {
+        $sites = SiteManager::all();
+        if (empty($sites)) {
+            \WP_CLI::log("No sites. Checking local site...");
+            $result = UptimeMonitor::check(['id' => 'local', 'url' => home_url()]);
+            $icon = $result['online'] ? '✓' : '✗';
+            \WP_CLI::log("  {$icon} " . home_url() . " ({$result['ms']}ms)");
+            return;
+        }
+
+        foreach ($sites as $site) {
+            $result = UptimeMonitor::check($site);
+            $icon = $result['online'] ? '✓' : '✗';
+            \WP_CLI::log("  {$icon} {$site['label']} — {$result['ms']}ms" . ($result['error'] ? " ({$result['error']})" : ''));
+        }
+    }
+
+    /**
+     * Run security scan on this site.
+     *
+     * ## EXAMPLES
+     *     wp gratis-fleet security
+     *
+     * @when after_wp_load
+     */
+    public function security($args, $assoc_args): void
+    {
+        \WP_CLI::log("Running security scan...\n");
+        $result = SecurityScanner::scan();
+
+        \WP_CLI::log("Security Score: {$result['score']}/100");
+        \WP_CLI::log("");
+
+        if (empty($result['issues'])) {
+            \WP_CLI::success("No issues found.");
+            return;
+        }
+
+        foreach ($result['issues'] as $issue) {
+            $icon = match ($issue['severity']) {
+                'high'   => '✗',
+                'medium' => '⚠',
+                default  => '○',
+            };
+            \WP_CLI::log("  {$icon} [{$issue['severity']}] {$issue['detail']}");
+        }
+    }
+
+    /**
+     * Run SEO audit on a URL or the whole site.
+     *
+     * ## OPTIONS
+     * [<url>]
+     * : URL to audit. Defaults to full site audit.
+     *
+     * ## EXAMPLES
+     *     wp gratis-fleet seo
+     *     wp gratis-fleet seo https://example.com/about/
+     *
+     * @when after_wp_load
+     */
+    public function seo($args, $assoc_args): void
+    {
+        if (!empty($args[0])) {
+            $result = SEOAuditor::audit($args[0]);
+            \WP_CLI::log("=== SEO Audit: {$result['url']} ===");
+            \WP_CLI::log("Score: {$result['score']}/100");
+            \WP_CLI::log("Title: " . ($result['title'] ?: '(missing)'));
+            \WP_CLI::log("Description: " . (substr($result['desc'] ?? '', 0, 80) ?: '(missing)'));
+            if (!empty($result['issues'])) {
+                \WP_CLI::log("\nIssues:");
+                foreach ($result['issues'] as $issue) {
+                    \WP_CLI::log("  • [{$issue['severity']}] {$issue['detail']}");
+                }
+            }
+            return;
+        }
+
+        \WP_CLI::log("Running full site SEO audit...\n");
+        $result = SEOAuditor::auditSite();
+        \WP_CLI::log("Average SEO Score: {$result['average_score']}/100\n");
+
+        foreach ($result['pages'] as $page) {
+            $icon = ($page['score'] ?? 0) >= 80 ? '✓' : (($page['score'] ?? 0) >= 50 ? '⚠' : '✗');
+            $url = str_replace(home_url(), '', $page['url'] ?? '');
+            \WP_CLI::log("  {$icon} {$page['score']}/100 — {$url}");
+        }
     }
 }

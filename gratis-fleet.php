@@ -23,6 +23,11 @@ add_action('plugins_loaded', function () {
     if (defined('WP_CLI') && WP_CLI) {
         \WP_CLI::add_command('gratis-fleet', \Gratis\Fleet\CLI\FleetCommand::class);
     }
+
+    // Start uptime monitoring if sites are configured
+    if (get_option('gratis_fleet_sites')) {
+        \Gratis\Fleet\UptimeMonitor::init();
+    }
 });
 
 // REST API for fleet communication (worker mode)
