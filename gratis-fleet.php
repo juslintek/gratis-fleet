@@ -27,6 +27,7 @@ add_action('plugins_loaded', function () {
     // Start uptime monitoring if sites are configured
     if (get_option('gratis_fleet_sites')) {
         \Gratis\Fleet\UptimeMonitor::init();
+        \Gratis\Fleet\Notifications::init();
     }
 });
 
