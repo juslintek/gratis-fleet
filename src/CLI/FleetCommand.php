@@ -284,3 +284,4 @@ final class FleetCommand
         }
     }
 }
+// Note: webhook commands added via separate method injection would go here

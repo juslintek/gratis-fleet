@@ -28,6 +28,7 @@ add_action('plugins_loaded', function () {
     if (get_option('gratis_fleet_sites')) {
         \Gratis\Fleet\UptimeMonitor::init();
         \Gratis\Fleet\Notifications::init();
+        \Gratis\Fleet\WebhookHub::init();
     }
 });
 
