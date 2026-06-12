@@ -5,12 +5,11 @@ namespace Gratis\Fleet;
  * Integration hub: webhooks + pre-built notifications.
  * Replaces Zapier for WordPress-to-external-service connections.
  */
-final class WebhookHub
-{
+final class WebhookHub {
+
     private const OPTION = 'gratis_fleet_webhooks';
 
-    public static function init(): void
-    {
+    public static function init(): void {
         $webhooks = self::all();
         foreach ($webhooks as $wh) {
             if (!($wh['active'] ?? true)) continue;
@@ -27,15 +26,13 @@ final class WebhookHub
         ]);
     }
 
-    public static function add(string $hook, string $url, string $label = '', string $format = 'json'): void
-    {
+    public static function add(string $hook, string $url, string $label = '', string $format = 'json'): void {
         $all = self::all();
         $all[] = ['hook' => $hook, 'url' => $url, 'label' => $label ?: $hook, 'format' => $format, 'active' => true, 'created' => gmdate('c')];
         update_option(self::OPTION, $all);
     }
 
-    public static function remove(int $index): bool
-    {
+    public static function remove(int $index): bool {
         $all = self::all();
         if (!isset($all[$index])) return false;
         array_splice($all, $index, 1);
@@ -43,10 +40,10 @@ final class WebhookHub
         return true;
     }
 
-    public static function all(): array { return get_option(self::OPTION, []); }
+    public static function all(): array {
+ return get_option(self::OPTION, []); }
 
-    public static function fire(array $webhook, array $args): void
-    {
+    public static function fire(array $webhook, array $args): void {
         $payload = [
             'hook'      => $webhook['hook'],
             'site'      => get_site_url(),
@@ -65,22 +62,20 @@ final class WebhookHub
 
         wp_remote_post($url, [
             'headers' => ['Content-Type' => 'application/json'],
-            'body'    => json_encode($payload),
+            'body'    => wp_json_encode($payload),
             'timeout' => 5,
             'blocking' => false,
         ]);
     }
 
-    public static function receive(\WP_REST_Request $request): \WP_REST_Response
-    {
+    public static function receive(\WP_REST_Request $request): \WP_REST_Response {
         $data = $request->get_json_params();
         $action = $data['action'] ?? 'gratis_webhook_received';
         do_action($action, $data);
         return new \WP_REST_Response(['received' => true]);
     }
 
-    public static function authenticateReceiver(\WP_REST_Request $request): bool
-    {
+    public static function authenticateReceiver(\WP_REST_Request $request): bool {
         $key = $request->get_header('X-Webhook-Key');
         $stored = get_option('gratis_fleet_api_key', '');
         return $key && hash_equals($stored, $key);

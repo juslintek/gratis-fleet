@@ -5,11 +5,10 @@ namespace Gratis\Fleet;
  * Broken link checker — what ManageWP charges extra for. Free in Gratis.
  * Scans post content for links and checks their HTTP status.
  */
-final class BrokenLinkChecker
-{
+final class BrokenLinkChecker {
+
     /** Scan all published posts for broken links. */
-    public static function scan(int $limit = 50): array
-    {
+    public static function scan(int $limit = 50): array {
         $posts = get_posts([
             'post_type'      => ['post', 'page'],
             'post_status'    => 'publish',
@@ -21,7 +20,7 @@ final class BrokenLinkChecker
         foreach ($posts as $post) {
             $links = self::extractLinks($post->post_content);
             foreach ($links as $url) {
-                $results['checked']++;
+                ++$results['checked'];
                 $status = self::checkUrl($url);
 
                 if ($status === 0 || $status >= 400) {
@@ -45,16 +44,14 @@ final class BrokenLinkChecker
         return $results;
     }
 
-    private static function extractLinks(string $content): array
-    {
+    private static function extractLinks(string $content): array {
         preg_match_all('/href=["\']([^"\']+)["\']/', $content, $matches);
         $links = $matches[1] ?? [];
         // Filter to only external + internal http links
         return array_filter($links, fn($url) => str_starts_with($url, 'http'));
     }
 
-    private static function checkUrl(string $url): int
-    {
+    private static function checkUrl(string $url): int {
         $response = wp_remote_head($url, [
             'timeout'     => 5,
             'redirection' => 0,

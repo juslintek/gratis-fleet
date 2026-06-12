@@ -5,11 +5,10 @@ namespace Gratis\Fleet;
  * SEO auditor — meta tags, headings, schema, sitemap check.
  * What ManageWP/Yoast Premium charge for. Free in Gratis.
  */
-final class SEOAuditor
-{
+final class SEOAuditor {
+
     /** Audit a URL for SEO issues. */
-    public static function audit(string $url): array
-    {
+    public static function audit(string $url): array {
         $response = wp_remote_get($url, ['timeout' => 15, 'sslverify' => false]);
         if (is_wp_error($response)) {
             return ['error' => $response->get_error_message()];
@@ -26,7 +25,7 @@ final class SEOAuditor
             $issues[] = ['severity' => 'high', 'detail' => 'Missing <title> tag'];
             $score -= 20;
         } elseif (strlen($title) > 60) {
-            $issues[] = ['severity' => 'medium', 'detail' => "Title too long (" . strlen($title) . " chars, max 60)"];
+            $issues[] = ['severity' => 'medium', 'detail' => 'Title too long (' . strlen($title) . ' chars, max 60)'];
             $score -= 5;
         }
 
@@ -37,7 +36,7 @@ final class SEOAuditor
             $issues[] = ['severity' => 'high', 'detail' => 'Missing meta description'];
             $score -= 15;
         } elseif (strlen($desc) > 160) {
-            $issues[] = ['severity' => 'low', 'detail' => "Meta description too long (" . strlen($desc) . " chars, max 160)"];
+            $issues[] = ['severity' => 'low', 'detail' => 'Meta description too long (' . strlen($desc) . ' chars, max 160)'];
             $score -= 3;
         }
 
@@ -99,8 +98,7 @@ final class SEOAuditor
     }
 
     /** Audit the entire site (homepage + sample pages). */
-    public static function auditSite(): array
-    {
+    public static function auditSite(): array {
         $urls = [home_url('/')];
 
         // Add a few published pages

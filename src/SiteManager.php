@@ -2,19 +2,18 @@
 namespace Gratis\Fleet;
 
 /** Manages the fleet of connected WordPress sites. */
-final class SiteManager
-{
+final class SiteManager {
+
     private const OPTION = 'gratis_fleet_sites';
 
-    public static function add(string $url, string $apiKey, string $label = ''): array
-    {
+    public static function add(string $url, string $apiKey, string $label = ''): array {
         $sites = self::all();
         $id = md5($url);
         $sites[$id] = [
             'id'      => $id,
             'url'     => rtrim($url, '/'),
             'api_key' => $apiKey,
-            'label'   => $label ?: parse_url($url, PHP_URL_HOST),
+            'label'   => $label ?: wp_parse_url($url, PHP_URL_HOST),
             'added'   => gmdate('c'),
             'last_seen' => null,
             'status'  => 'unknown',
@@ -23,8 +22,7 @@ final class SiteManager
         return $sites[$id];
     }
 
-    public static function remove(string $id): bool
-    {
+    public static function remove(string $id): bool {
         $sites = self::all();
         if (!isset($sites[$id])) return false;
         unset($sites[$id]);
@@ -32,19 +30,16 @@ final class SiteManager
         return true;
     }
 
-    public static function all(): array
-    {
+    public static function all(): array {
         return get_option(self::OPTION, []);
     }
 
-    public static function get(string $id): ?array
-    {
+    public static function get(string $id): ?array {
         return self::all()[$id] ?? null;
     }
 
     /** Ping a remote site's worker endpoint to get status. */
-    public static function ping(array $site): array
-    {
+    public static function ping(array $site): array {
         $response = wp_remote_get($site['url'] . '/wp-json/gratis-fleet/v1/status', [
             'headers' => ['X-Fleet-Key' => $site['api_key']],
             'timeout' => 10,
@@ -72,14 +67,13 @@ final class SiteManager
     }
 
     /** Send a command to a remote site. */
-    public static function command(array $site, string $action, array $params = []): array
-    {
+    public static function command(array $site, string $action, array $params = []): array {
         $response = wp_remote_post($site['url'] . '/wp-json/gratis-fleet/v1/command', [
             'headers' => [
                 'X-Fleet-Key'  => $site['api_key'],
                 'Content-Type' => 'application/json',
             ],
-            'body'    => json_encode(['action' => $action, 'params' => $params]),
+            'body'    => wp_json_encode(['action' => $action, 'params' => $params]),
             'timeout' => 30,
         ]);
 

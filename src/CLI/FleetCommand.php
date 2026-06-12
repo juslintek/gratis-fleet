@@ -8,8 +8,8 @@ use Gratis\Fleet\SEOAuditor;
 use Gratis\Fleet\BrokenLinkChecker;
 
 /** WP-CLI commands: wp gratis-fleet <subcommand> */
-final class FleetCommand
-{
+final class FleetCommand {
+
     /**
      * Add a site to the fleet.
      *
@@ -26,8 +26,7 @@ final class FleetCommand
      *
      * @when after_wp_load
      */
-    public function add($args, $assoc_args): void
-    {
+    public function add($args, $assoc_args): void {
         $site = SiteManager::add($args[0], $args[1], $assoc_args['label'] ?? '');
         \WP_CLI::success("Added: {$site['label']} ({$site['url']})");
     }
@@ -40,11 +39,11 @@ final class FleetCommand
      *
      * @when after_wp_load
      */
-    public function list($args, $assoc_args): void
-    {
+    public function list($args, $assoc_args): void {
+        unset($args, $assoc_args);
         $sites = SiteManager::all();
         if (empty($sites)) {
-            \WP_CLI::log("No sites in fleet. Add one: wp gratis-fleet add <url> <api-key>");
+            \WP_CLI::log('No sites in fleet. Add one: wp gratis-fleet add <url> <api-key>');
             return;
         }
         $rows = array_map(fn($s) => [
@@ -65,20 +64,20 @@ final class FleetCommand
      *
      * @when after_wp_load
      */
-    public function status($args, $assoc_args): void
-    {
+    public function status($args, $assoc_args): void {
+        unset($args, $assoc_args);
         $sites = SiteManager::all();
         if (empty($sites)) {
-            \WP_CLI::log("No sites in fleet.");
+            \WP_CLI::log('No sites in fleet.');
             return;
         }
 
-        \WP_CLI::log("Checking " . count($sites) . " site(s)...\n");
+        \WP_CLI::log('Checking ' . count($sites) . " site(s)...\n");
         foreach ($sites as $site) {
             $result = SiteManager::ping($site);
             if ($result['online']) {
                 \WP_CLI::log("✓ {$site['label']}");
-                \WP_CLI::log("  WP {$result['wordpress']} | PHP {$result['php']} | {$result['plugins_active']} plugins | {$result['updates_pending']} updates pending");
+                \WP_CLI::log("  WP {$result['WordPress']} | PHP {$result['php']} | {$result['plugins_active']} plugins | {$result['updates_pending']} updates pending");
             } else {
                 \WP_CLI::warning("✗ {$site['label']}: " . ($result['error'] ?? 'unreachable'));
             }
@@ -94,8 +93,8 @@ final class FleetCommand
      * @subcommand update-all
      * @when after_wp_load
      */
-    public function update_all($args, $assoc_args): void
-    {
+    public function update_all($args, $assoc_args): void {
+        unset($args, $assoc_args);
         $sites = SiteManager::all();
         foreach ($sites as $site) {
             \WP_CLI::log("Updating: {$site['label']}...");
@@ -103,7 +102,7 @@ final class FleetCommand
             if ($result['success'] ?? false) {
                 \WP_CLI::success("  Updated {$result['updated']} plugin(s)");
             } else {
-                \WP_CLI::warning("  Failed: " . ($result['error'] ?? 'unknown'));
+                \WP_CLI::warning('  Failed: ' . ($result['error'] ?? 'unknown'));
             }
         }
     }
@@ -117,15 +116,15 @@ final class FleetCommand
      * @subcommand purge-all
      * @when after_wp_load
      */
-    public function purge_all($args, $assoc_args): void
-    {
+    public function purge_all($args, $assoc_args): void {
+        unset($args, $assoc_args);
         $sites = SiteManager::all();
         foreach ($sites as $site) {
             $result = SiteManager::command($site, 'purge_cache');
             $icon = ($result['success'] ?? false) ? '✓' : '✗';
             \WP_CLI::log("  {$icon} {$site['label']}");
         }
-        \WP_CLI::success("Cache purged across " . count($sites) . " site(s).");
+        \WP_CLI::success('Cache purged across ' . count($sites) . ' site(s).');
     }
 
     /**
@@ -136,16 +135,16 @@ final class FleetCommand
      *
      * @when after_wp_load
      */
-    public function key($args, $assoc_args): void
-    {
+    public function key($args, $assoc_args): void {
+        unset($args, $assoc_args);
         $key = get_option('gratis_fleet_api_key', '');
         if (!$key) {
             $key = wp_generate_password(32, false);
             update_option('gratis_fleet_api_key', $key);
         }
         \WP_CLI::log("Fleet API Key: {$key}");
-        \WP_CLI::log("Add this site to a controller with:");
-        \WP_CLI::log("  wp gratis-fleet add " . get_site_url() . " {$key}");
+        \WP_CLI::log('Add this site to a controller with:');
+        \WP_CLI::log('  wp gratis-fleet add ' . get_site_url() . " {$key}");
     }
 
     /**
@@ -156,11 +155,11 @@ final class FleetCommand
      *
      * @when after_wp_load
      */
-    public function uptime($args, $assoc_args): void
-    {
+    public function uptime($args, $assoc_args): void {
+        unset($args, $assoc_args);
         $sites = SiteManager::all();
         if (empty($sites)) {
-            \WP_CLI::log("No sites. Checking local site...");
+            \WP_CLI::log('No sites. Checking local site...');
             $result = UptimeMonitor::check(['id' => 'local', 'url' => home_url()]);
             $icon = $result['online'] ? '✓' : '✗';
             \WP_CLI::log("  {$icon} " . home_url() . " ({$result['ms']}ms)");
@@ -182,16 +181,16 @@ final class FleetCommand
      *
      * @when after_wp_load
      */
-    public function security($args, $assoc_args): void
-    {
+    public function security($args, $assoc_args): void {
+        unset($args, $assoc_args);
         \WP_CLI::log("Running security scan...\n");
         $result = SecurityScanner::scan();
 
         \WP_CLI::log("Security Score: {$result['score']}/100");
-        \WP_CLI::log("");
+        \WP_CLI::log('');
 
         if (empty($result['issues'])) {
-            \WP_CLI::success("No issues found.");
+            \WP_CLI::success('No issues found.');
             return;
         }
 
@@ -218,14 +217,14 @@ final class FleetCommand
      *
      * @when after_wp_load
      */
-    public function seo($args, $assoc_args): void
-    {
+    public function seo($args, $assoc_args): void {
+        unset($assoc_args);
         if (!empty($args[0])) {
             $result = SEOAuditor::audit($args[0]);
             \WP_CLI::log("=== SEO Audit: {$result['url']} ===");
             \WP_CLI::log("Score: {$result['score']}/100");
-            \WP_CLI::log("Title: " . ($result['title'] ?: '(missing)'));
-            \WP_CLI::log("Description: " . (substr($result['desc'] ?? '', 0, 80) ?: '(missing)'));
+            \WP_CLI::log('Title: ' . ($result['title'] ?: '(missing)'));
+            \WP_CLI::log('Description: ' . (substr($result['desc'] ?? '', 0, 80) ?: '(missing)'));
             if (!empty($result['issues'])) {
                 \WP_CLI::log("\nIssues:");
                 foreach ($result['issues'] as $issue) {
@@ -261,8 +260,7 @@ final class FleetCommand
      * @subcommand broken-links
      * @when after_wp_load
      */
-    public function broken_links($args, $assoc_args): void
-    {
+    public function broken_links($args, $assoc_args): void {
         $limit = (int) ($assoc_args['limit'] ?? 50);
         \WP_CLI::log("Scanning for broken links (up to {$limit} posts)...");
         $result = BrokenLinkChecker::scan($limit);
@@ -280,7 +278,7 @@ final class FleetCommand
             }
         }
         if (empty($result['broken']) && empty($result['redirects'])) {
-            \WP_CLI::success("No broken links found!");
+            \WP_CLI::success('No broken links found!');
         }
     }
 }

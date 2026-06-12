@@ -5,11 +5,10 @@ namespace Gratis\Fleet;
  * Security scanner — file integrity + vulnerability detection.
  * What ManageWP charges $1/site/mo for. Free in Gratis.
  */
-final class SecurityScanner
-{
+final class SecurityScanner {
+
     /** Scan for common security issues. */
-    public static function scan(): array
-    {
+    public static function scan(): array {
         $issues = [];
 
         // 1. Check WordPress core file integrity
@@ -34,13 +33,8 @@ final class SecurityScanner
         ];
     }
 
-    private static function checkCoreIntegrity(): array
-    {
+    private static function checkCoreIntegrity(): array {
         $issues = [];
-        // Check if wp-config.php is in webroot (should be one level up ideally)
-        if (file_exists(ABSPATH . 'wp-config.php') && !file_exists(dirname(ABSPATH) . '/wp-config.php')) {
-            // This is normal, not an issue
-        }
 
         // Check for suspicious files in root
         $suspicious = ['adminer.php', 'phpinfo.php', 'info.php', 'test.php', 'shell.php'];
@@ -53,26 +47,24 @@ final class SecurityScanner
         return $issues;
     }
 
-    private static function checkPermissions(): array
-    {
+    private static function checkPermissions(): array {
         $issues = [];
         $wpConfig = ABSPATH . 'wp-config.php';
         if (file_exists($wpConfig)) {
             $perms = fileperms($wpConfig) & 0777;
             if ($perms > 0644) {
-                $issues[] = ['severity' => 'medium', 'type' => 'permissions', 'detail' => "wp-config.php permissions too open: " . decoct($perms)];
+                $issues[] = ['severity' => 'medium', 'type' => 'permissions', 'detail' => 'wp-config.php permissions too open: ' . decoct($perms)];
             }
         }
 
-        if (is_writable(ABSPATH)) {
+        if (is_writable(ABSPATH)) { // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_is_writable -- read-only permission probe of the WP root; WP_Filesystem adds no value for a stat() check.
             $issues[] = ['severity' => 'low', 'type' => 'permissions', 'detail' => 'WordPress root directory is writable'];
         }
 
         return $issues;
     }
 
-    private static function checkVulnerablePatterns(): array
-    {
+    private static function checkVulnerablePatterns(): array {
         $issues = [];
 
         // Check if debug is enabled in production
@@ -94,8 +86,7 @@ final class SecurityScanner
         return $issues;
     }
 
-    private static function checkSecurityHeaders(): array
-    {
+    private static function checkSecurityHeaders(): array {
         $issues = [];
         $response = wp_remote_get(home_url('/'), ['timeout' => 5, 'sslverify' => false]);
         if (is_wp_error($response)) return $issues;
@@ -113,8 +104,7 @@ final class SecurityScanner
         return $issues;
     }
 
-    private static function checkUsers(): array
-    {
+    private static function checkUsers(): array {
         $issues = [];
         // Check if 'admin' username exists
         if (get_user_by('login', 'admin')) {

@@ -5,36 +5,33 @@ namespace Gratis\Fleet;
  * Uptime monitoring — what ManageWP charges $1/site/mo for. Free in Gratis.
  * Runs via WP-Cron on the controller site, pings fleet sites.
  */
-final class UptimeMonitor
-{
+final class UptimeMonitor {
+
     private const OPTION = 'gratis_fleet_uptime_log';
     private const CRON_HOOK = 'gratis_fleet_uptime_check';
 
-    public static function init(): void
-    {
+    public static function init(): void {
         add_action(self::CRON_HOOK, [__CLASS__, 'checkAll']);
 
         if (!wp_next_scheduled(self::CRON_HOOK)) {
             wp_schedule_event(time(), 'five_minutes', self::CRON_HOOK);
         }
 
-        // Register custom interval
-        add_filter('cron_schedules', function ($schedules) {
+        // Register custom interval.
+        add_filter('cron_schedules', function ($schedules) { // phpcs:ignore WordPress.WP.CronInterval.CronSchedulesInterval -- uptime monitoring intentionally polls every 5 minutes.
             $schedules['five_minutes'] = ['interval' => 300, 'display' => 'Every 5 minutes'];
             return $schedules;
         });
     }
 
-    public static function checkAll(): void
-    {
+    public static function checkAll(): void {
         $sites = SiteManager::all();
         foreach ($sites as $site) {
             self::check($site);
         }
     }
 
-    public static function check(array $site): array
-    {
+    public static function check(array $site): array {
         $start = microtime(true);
         $response = wp_remote_get($site['url'], [
             'timeout'   => 10,
@@ -56,8 +53,7 @@ final class UptimeMonitor
     }
 
     /** Get uptime stats for a site over the last N hours. */
-    public static function stats(string $siteId, int $hours = 24): array
-    {
+    public static function stats(string $siteId, int $hours = 24): array {
         $log = self::getLog();
         $cutoff = strtotime("-{$hours} hours");
         $entries = array_filter($log, fn($e) =>
@@ -78,8 +74,7 @@ final class UptimeMonitor
         ];
     }
 
-    private static function log(array $entry): void
-    {
+    private static function log(array $entry): void {
         $log = self::getLog();
         $log[] = $entry;
         // Keep last 2000 entries
@@ -87,8 +82,7 @@ final class UptimeMonitor
         update_option(self::OPTION, $log, false);
     }
 
-    private static function getLog(): array
-    {
+    private static function getLog(): array {
         return get_option(self::OPTION, []);
     }
 }

@@ -5,16 +5,14 @@ namespace Gratis\Fleet;
  * Email notifications for fleet events.
  * Sends alerts for: downtime, security issues, available updates.
  */
-final class Notifications
-{
-    public static function init(): void
-    {
+final class Notifications {
+
+    public static function init(): void {
         add_action('gratis_fleet_uptime_check', [__CLASS__, 'checkDowntime'], 20);
         add_action('admin_init', [__CLASS__, 'checkUpdates']);
     }
 
-    public static function checkDowntime(): void
-    {
+    public static function checkDowntime(): void {
         if (!get_option('gratis_fleet_notify_downtime', true)) return;
 
         $sites = SiteManager::all();
@@ -30,8 +28,7 @@ final class Notifications
         }
     }
 
-    public static function checkUpdates(): void
-    {
+    public static function checkUpdates(): void {
         if (!get_option('gratis_fleet_notify_updates', true)) return;
 
         $updates = get_site_transient('update_plugins');
@@ -50,8 +47,7 @@ final class Notifications
         }
     }
 
-    public static function send(string $subject, string $message): void
-    {
+    public static function send(string $subject, string $message): void {
         $to = get_option('gratis_fleet_notify_email', get_option('admin_email'));
         $subject = '[Gratis Fleet] ' . $subject;
         wp_mail($to, $subject, $message);
