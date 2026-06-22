@@ -24,6 +24,16 @@ define('GRATIS_FLEET_URL', plugin_dir_url(__FILE__));
 require_once __DIR__ . '/autoload.php';
 
 add_action('plugins_loaded', function () {
+    // One-time migration: disable autoload on growing options.
+    if (!get_option('gratis_fleet_autoload_fixed')) {
+        global $wpdb;
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+        $wpdb->update($wpdb->options, ['autoload' => 'no'], ['option_name' => 'gratis_fleet_sites']);
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+        $wpdb->update($wpdb->options, ['autoload' => 'no'], ['option_name' => 'gratis_fleet_webhooks']);
+        update_option('gratis_fleet_autoload_fixed', 1);
+    }
+
     if (defined('WP_CLI') && WP_CLI) {
         \WP_CLI::add_command('gratis-fleet', \Gratis\Fleet\CLI\FleetCommand::class);
     }

@@ -18,7 +18,7 @@ final class SiteManager {
             'last_seen' => null,
             'status'  => 'unknown',
         ];
-        update_option(self::OPTION, $sites);
+        update_option(self::OPTION, $sites, false);
         return $sites[$id];
     }
 
@@ -26,7 +26,7 @@ final class SiteManager {
         $sites = self::all();
         if (!isset($sites[$id])) return false;
         unset($sites[$id]);
-        update_option(self::OPTION, $sites);
+        update_option(self::OPTION, $sites, false);
         return true;
     }
 
@@ -60,7 +60,7 @@ final class SiteManager {
         if (isset($sites[$site['id']])) {
             $sites[$site['id']]['last_seen'] = gmdate('c');
             $sites[$site['id']]['status'] = 'online';
-            update_option(self::OPTION, $sites);
+            update_option(self::OPTION, $sites, false);
         }
 
         return array_merge(['online' => true], $data ?? []);

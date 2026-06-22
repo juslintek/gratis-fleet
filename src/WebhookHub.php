@@ -29,14 +29,14 @@ final class WebhookHub {
     public static function add(string $hook, string $url, string $label = '', string $format = 'json'): void {
         $all = self::all();
         $all[] = ['hook' => $hook, 'url' => $url, 'label' => $label ?: $hook, 'format' => $format, 'active' => true, 'created' => gmdate('c')];
-        update_option(self::OPTION, $all);
+        update_option(self::OPTION, $all, false);
     }
 
     public static function remove(int $index): bool {
         $all = self::all();
         if (!isset($all[$index])) return false;
         array_splice($all, $index, 1);
-        update_option(self::OPTION, $all);
+        update_option(self::OPTION, $all, false);
         return true;
     }
 
