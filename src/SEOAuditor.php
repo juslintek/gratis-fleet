@@ -1,15 +1,16 @@
 <?php declare(strict_types=1);
 namespace Gratis\Fleet;
 
+defined('ABSPATH') || exit;
+
 /**
  * SEO auditor — meta tags, headings, schema, sitemap check.
- * What ManageWP/Yoast Premium charge for. Free in Gratis.
  */
 final class SEOAuditor {
 
     /** Audit a URL for SEO issues. */
     public static function audit(string $url): array {
-        $response = wp_remote_get($url, ['timeout' => 15, 'sslverify' => false]);
+        $response = wp_remote_get($url, ['timeout' => 15]);
         if (is_wp_error($response)) {
             return ['error' => $response->get_error_message()];
         }
@@ -82,7 +83,7 @@ final class SEOAuditor {
 
         // Sitemap check
         $sitemapUrl = rtrim($url, '/') . '/sitemap.xml';
-        $sitemapResp = wp_remote_head($sitemapUrl, ['timeout' => 5, 'sslverify' => false]);
+        $sitemapResp = wp_remote_head($sitemapUrl, ['timeout' => 5]);
         if (is_wp_error($sitemapResp) || wp_remote_retrieve_response_code($sitemapResp) !== 200) {
             $issues[] = ['severity' => 'medium', 'detail' => 'Sitemap not found at /sitemap.xml'];
             $score -= 5;

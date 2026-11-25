@@ -88,7 +88,7 @@ final class SecurityScanner {
 
     private static function checkSecurityHeaders(): array {
         $issues = [];
-        $response = wp_remote_get(home_url('/'), ['timeout' => 5, 'sslverify' => false]);
+        $response = wp_remote_get(home_url('/'), ['timeout' => 5]);
         if (is_wp_error($response)) return $issues;
 
         $headers = wp_remote_retrieve_headers($response);

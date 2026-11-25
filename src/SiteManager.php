@@ -1,6 +1,7 @@
 <?php declare(strict_types=1);
 namespace Gratis\Fleet;
 
+defined('ABSPATH') || exit;
 /** Manages the fleet of connected WordPress sites. */
 final class SiteManager {
 

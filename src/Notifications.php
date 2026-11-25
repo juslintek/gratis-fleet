@@ -1,6 +1,7 @@
 <?php declare(strict_types=1);
 namespace Gratis\Fleet;
 
+defined('ABSPATH') || exit;
 /**
  * Email notifications for fleet events.
  * Sends alerts for: downtime, security issues, available updates.
