@@ -41,11 +41,28 @@ Yes. Everything is free — no "Pro" version, no locked features, and no nag scr
 
 = Does this plugin make external HTTP requests? =
 
-No. Unless you explicitly configure an external service (such as a CDN or SMTP host), the plugin does not phone home or send analytics.
+Only to the remote WordPress sites and optional webhook URLs that you explicitly configure for fleet management and alerts.
 
 = Where do I get support? =
 
 Open an issue on the plugin's GitHub repository.
+
+== Third-Party Services ==
+
+This plugin connects only to endpoints you configure:
+
+= Managed WordPress Sites =
+
+When you register child sites in the Fleet dashboard, the plugin sends authenticated HTTP requests to those sites' REST APIs for health checks, uptime monitoring, SEO/security audits, and bulk updates.
+
+= Optional Webhook Alerts (Slack / Discord / Custom) =
+
+When you add webhook URLs in the settings, notifications are sent to the configured URL (such as Slack or Discord incoming webhooks).
+
+* Slack: [Terms of Service](https://slack.com/terms-of-service) | [Privacy Policy](https://slack.com/privacy-policy)
+* Discord: [Terms of Service](https://discord.com/terms) | [Privacy Policy](https://discord.com/privacy)
+
+No external requests are made unless you configure managed sites or webhooks.
 
 == Changelog ==
 

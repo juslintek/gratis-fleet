@@ -1,6 +1,7 @@
 <?php declare(strict_types=1);
 namespace Gratis\Fleet;
 
+defined('ABSPATH') || exit;
 /**
  * Broken link checker — what ManageWP charges extra for. Free in Gratis.
  * Scans post content for links and checks their HTTP status.
@@ -55,7 +56,6 @@ final class BrokenLinkChecker {
         $response = wp_remote_head($url, [
             'timeout'     => 5,
             'redirection' => 0,
-            'sslverify'   => false,
         ]);
         if (is_wp_error($response)) return 0;
         return (int) wp_remote_retrieve_response_code($response);

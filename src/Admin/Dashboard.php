@@ -1,6 +1,7 @@
 <?php declare(strict_types=1);
 namespace Gratis\Fleet\Admin;
 
+defined('ABSPATH') || exit;
 use Gratis\Fleet\SiteManager;
 use Gratis\Fleet\SecurityScanner;
 use Gratis\Fleet\SEOAuditor;

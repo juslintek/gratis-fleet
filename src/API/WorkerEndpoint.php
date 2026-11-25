@@ -137,8 +137,15 @@ final class WorkerEndpoint {
     }
 
     private static function getDbSize(): string {
+        $cached = wp_cache_get('gratis_fleet_db_size', 'gratis_fleet');
+        if (is_string($cached)) {
+            return $cached;
+        }
         global $wpdb;
-        $size = $wpdb->get_var('SELECT SUM(data_length + index_length) FROM information_schema.tables WHERE table_schema = DATABASE()');
-        return $size ? round($size / 1048576, 1) . ' MB' : 'unknown';
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Aggregate DB size telemetry cached below.
+        $size   = $wpdb->get_var('SELECT SUM(data_length + index_length) FROM information_schema.tables WHERE table_schema = DATABASE()');
+        $result = $size ? round($size / 1048576, 1) . ' MB' : 'unknown';
+        wp_cache_set('gratis_fleet_db_size', $result, 'gratis_fleet', 300);
+        return $result;
     }
 }

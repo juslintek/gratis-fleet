@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Gratis Fleet
  * Plugin URI: https://github.com/juslintek/gratis-fleet
- * Description: Free multi-WordPress fleet management. Manage unlimited sites from one dashboard, run fleet-wide bulk plugin updates, monitor uptime, and scan security/SEO. What ManageWP charges $2/site/mo for.
+ * Description: Multi-WordPress fleet management. Manage unlimited sites from one dashboard, run fleet-wide bulk plugin updates, monitor uptime, and scan security/SEO.
  * Version: 1.0.0
  * Requires at least: 6.0
  * Requires PHP: 8.1

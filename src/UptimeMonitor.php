@@ -1,6 +1,7 @@
 <?php declare(strict_types=1);
 namespace Gratis\Fleet;
 
+defined('ABSPATH') || exit;
 /**
  * Uptime monitoring — what ManageWP charges $1/site/mo for. Free in Gratis.
  * Runs via WP-Cron on the controller site, pings fleet sites.
@@ -34,8 +35,7 @@ final class UptimeMonitor {
     public static function check(array $site): array {
         $start = microtime(true);
         $response = wp_remote_get($site['url'], [
-            'timeout'   => 10,
-            'sslverify' => false,
+            'timeout' => 10,
         ]);
         $duration = round((microtime(true) - $start) * 1000);
 

@@ -1,6 +1,7 @@
 <?php declare(strict_types=1);
 namespace Gratis\Fleet;
 
+defined('ABSPATH') || exit;
 /**
  * Integration hub: webhooks + pre-built notifications.
  * Replaces Zapier for WordPress-to-external-service connections.
@@ -69,15 +70,16 @@ final class WebhookHub {
     }
 
     public static function receive(\WP_REST_Request $request): \WP_REST_Response {
-        $data = $request->get_json_params();
-        $action = $data['action'] ?? 'gratis_webhook_received';
-        do_action($action, $data);
-        return new \WP_REST_Response(['received' => true]);
+        $data  = $request->get_json_params();
+        $data  = is_array($data) ? $data : [];
+        $event = sanitize_key((string) ($data['action'] ?? 'webhook'));
+        do_action('gratis_fleet_webhook_received', $event, $data);
+        return new \WP_REST_Response(['received' => true, 'event' => $event]);
     }
 
     public static function authenticateReceiver(\WP_REST_Request $request): bool {
-        $key = $request->get_header('X-Webhook-Key');
+        $key    = $request->get_header('X-Webhook-Key');
         $stored = get_option('gratis_fleet_api_key', '');
-        return $key && hash_equals($stored, $key);
+        return is_string($stored) && '' !== $stored && is_string($key) && '' !== $key && hash_equals($stored, $key);
     }
 }
