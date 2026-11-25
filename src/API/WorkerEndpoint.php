@@ -1,6 +1,8 @@
 <?php declare(strict_types=1);
 namespace Gratis\Fleet\API;
 
+defined('ABSPATH') || exit;
+
 /** REST endpoints exposed by worker sites for fleet management. */
 final class WorkerEndpoint {
 

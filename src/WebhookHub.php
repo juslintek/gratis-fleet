@@ -61,7 +61,7 @@ final class WebhookHub {
             $payload = ['content' => "[{$webhook['label']}] triggered on " . get_site_url()];
         }
 
-        wp_remote_post($url, [
+        wp_safe_remote_post($url, [
             'headers' => ['Content-Type' => 'application/json'],
             'body'    => wp_json_encode($payload),
             'timeout' => 5,
